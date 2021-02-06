@@ -110,7 +110,7 @@
       }
       let strprevMonday = formatDate(prevMonday);
       let selectedvalue = usercurrency.options[usercurrency.selectedIndex].text;
-      let response1 = await fetch("https://api.exchangeratesapi.io/history?start_at=" + strprevMonday + "&end_at=" + today + "&symbols=" + selectedvalue)
+      let response1 = await fetch("https://api.exchangeratesapi.io/history?start_at=" + strprevMonday + "&end_at=" + today + "&symbols=" + selectedvalue+"&base=PLN")
         .then(response => response.json())
         .then(function (data) {
           currencyRates = data.rates;
