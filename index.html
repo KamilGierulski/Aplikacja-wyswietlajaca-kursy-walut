@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <style>
+    .main-class {
+      margin: 15px;
+      text-align: start;
+    }
+
+    .row {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      flex-basis: 100%;
+      flex: 1;
+      text-align: start;
+
+    }
+
+    .first-column {
+      height: fit-content;
+
+    }
+
+    .second-column {
+      height: 100px;
+
+    }
+  </style>
+  <meta charset="utf-8">
+  <title>Aplikacja wyświetlająca kursy walut</title>
+</head>
+
+<body>
+  <div class='main-class'>
+    <div class='row'>
+      <div class='column'>
+        <div class='first-column'>
+          <p id="currency">
+        </div>
+      </div>
+      <div class='column' id="column2">
+        <div class='second-column'>
+          <select type="text" id=text1 onChange="listItems(this);">
+
+            <option value="">Wybierz walutę</option>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    var usercurrency = {};
+    var result = {};
+    getCurrencies();
+    async function getCurrencies() {
+      let response = await fetch('https://api.exchangeratesapi.io/latest?base=PLN')
+        .then(response => response.json())
+        .then(function (data) {
+          let list = document.getElementById('currency');
+          result = data.rates;
+        });
+      setListCurrency(result);
+      for (key in result) {
+        document.getElementById("currency").innerHTML += key + " " + "=" + " " + result[key] + '<br>';
+      }
+    }
+    function setListCurrency(result) {
+      let list = document.getElementById("text1");
+      for (key in result) {
+        var opt = document.createElement('option');
+        opt.innerHTML += key;
+        opt.value += key;
+        list.appendChild(opt);
+      }
+    }
+    async function listItems(usercurrency) {
+      var today = new Date();
+      var dd = today.getDate();
+      var mm = today.getMonth() + 1;
+      var yyyy = today.getFullYear();
+      if (dd < 10) {
+        dd = '0' + dd;
+      }
+
+      if (mm < 10) {
+        mm = '0' + mm;
+      }
+      today = yyyy + '-' + mm + '-' + dd;
+      var prevMonday = new Date();
+      prevMonday.setDate(prevMonday.getDate() - (prevMonday.getDay() + 6) % 7);
+      function formatDate(date) {
+        var d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear();
+
+        if (month.length < 2)
+          month = '0' + month;
+        if (day.length < 2)
+          day = '0' + day;
+
+        return [year, month, day].join('-');
+      }
+      let strprevMonday = formatDate(prevMonday);
+      let selectedvalue = usercurrency.options[usercurrency.selectedIndex].text;
+      let response1 = await fetch("https://api.exchangeratesapi.io/history?start_at=" + strprevMonday + "&end_at=" + today + "&symbols=" + selectedvalue)
+        .then(response => response.json())
+        .then(function (data) {
+          currencyRates = data.rates;
+          setlistItems(currencyRates, selectedvalue);
+        });
+
+    }
+    function setlistItems(currencyRates, selectedvalue) {
+      var div = document.createElement("div");
+      div.id = "items";
+      let column2 = document.getElementById("column2");
+      column2.appendChild(div);
+      document.getElementById('items').innerHTML = "";
+      Object.entries(currencyRates).forEach(function (rate) {
+        document.getElementById('items').innerHTML += rate[0] + " ";
+        document.getElementById('items').innerHTML += rate[1][selectedvalue] + "<br>";
+      });
+    }
+  </script>
+</body>
+
+</html>
